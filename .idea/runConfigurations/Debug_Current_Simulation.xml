@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug Current Simulation" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="utils.GatlingDebugger" />
+    <module name="gatling-cannon.main" />
+    <option name="PROGRAM_PARAMETERS" value="--current-simulation" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_Dump Current IntelliJ File" />
+    </method>
+  </configuration>
+</component>

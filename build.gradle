@@ -1,0 +1,90 @@
+plugins {
+  id "scala"
+}
+
+ext {
+  gatlingVersion = "3.2.0"
+  scalaMajorVersion = "2.12"
+  scalaVersion = "${scalaMajorVersion}.8"
+  jacksonVersion = "2.9.9"
+
+  gatlingDirectory = "gatling-bundle"
+  gatlingFullPath = "${gatlingDirectory}/gatling-charts-highcharts-bundle-${gatlingVersion}"
+  gatlingLibPath = "${gatlingFullPath}/lib"
+}
+
+repositories {
+  mavenCentral()
+}
+
+configurations {
+  gatling
+}
+
+dependencies {
+  // Gatling runtime
+  gatling "io.gatling.highcharts:gatling-charts-highcharts-bundle:${gatlingVersion}:bundle@zip"
+
+  implementation "org.scala-lang:scala-library:${scalaVersion}"
+
+  // GatlingDebugger needs this
+  implementation "io.gatling:gatling-test-framework:${gatlingVersion}"
+  implementation "io.gatling.highcharts:gatling-highcharts:${gatlingVersion}"
+  implementation "io.gatling.highcharts:gatling-charts-highcharts:${gatlingVersion}"
+  implementation "org.clapper:classutil_${scalaMajorVersion}:1.5.1"
+
+  // JsonUtils needs this
+  implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaMajorVersion}:${jacksonVersion}"
+
+  // add your custom dependencies for simulations here
+  //
+  // for example:
+  //
+  //   implementation "org.apache.commons:commons-lang3:3.9"
+  //
+}
+
+compileScala {
+  targetCompatibility = 1.8
+}
+
+ScalaCompileOptions.metaClass.useAnt = false
+
+sourceSets {
+  main {
+    scala {
+      //noinspection GroovyAssignabilityCheck
+      srcDirs = [ "simulations" ]
+    }
+  }
+}
+
+task copySimulationLibs(type: Copy) {
+  println "Unpacking simulation libs to path '${gatlingLibPath}'..."
+
+  from configurations.runtimeClasspath.files
+  into gatlingLibPath
+}
+
+task unpackGatlingBundle(type: Copy) {
+  println "Unpacking gatling bundle to path '${gatlingDirectory}'..."
+
+  configurations.gatling.files.each { file ->
+    from zipTree(file)
+    into gatlingDirectory
+  }
+}
+
+task cleanGatlingBundle(type: Delete) {
+  delete gatlingDirectory
+}
+
+task deployGatling(type: GradleBuild) {
+  tasks = [
+      "cleanGatlingBundle",
+      "unpackGatlingBundle",
+      "copySimulationLibs"
+  ]
+}
+
+defaultTasks "deployGatling"
